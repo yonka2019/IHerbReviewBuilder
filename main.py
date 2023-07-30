@@ -15,6 +15,7 @@ def main():
 
     if not check_url(driver):  # check if the correct web page
         return
+    print("[WORKING] Working on it..")
 
     if not fill_title(driver):  # fill title with randomized string
         return
