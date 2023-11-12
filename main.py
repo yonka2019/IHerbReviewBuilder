@@ -9,38 +9,65 @@ import elements
 
 
 def main():
+    # ! || RU VERSION || RU VERSION || RU VERSION || RU VERSION || RU VERSION || RU VERSION || RU VERSION || RU VERSION || !
     # go to firefox.exe folder, run in cmd: >> 'firefox.exe -marionette'  in order to enable remote connection
+    # go to https://il.iherb.com/ugc/myaccount/review (my account -> my reviews)
+    # put X number of stars on any item (in order to open review menu)
+    # run the script & enjoy
     firefox_services = Service(executable_path=r"files", service_args=['--marionette-port', '2828', '--connect-existing'])
     driver = webdriver.Firefox(service=firefox_services)
 
-    if not check_url(driver):  # check if the correct web page
-        return
-    print("[WORKING] Working on it..")
+    print("[STATUS] Checking current webpage URL..")
+    url_status = check_url(driver)
 
-    if not fill_title(driver):  # fill title with randomized string
+    if url_status:  # check if the correct web page
+        print("[STATUS] Success")
+    else:
+        print("[ERROR] Bad webpage opened (your are not in 'ugc/myaccount/review')")
         return
 
+    print("\n[STATUS] filling up the title review..")
+    title_status = fill_title(driver)  # fill title with randomized string
+
+    if title_status is None:
+        print("[STATUS] Success")
+    else:
+        print("[ERROR] Cant find title\n>> " + title_status.__str__())
+        return
+
+    print("\n[STATUS] Getting the required themes..")
     required_themes = get_required_themes(driver)  # get required themes from page
-    if required_themes is None:
+
+    if required_themes is not None:
+        print("[STATUS] Success")
+    else:
         return
 
+    print("\n[STATUS] Building review text and filling it..")
     review_text = build_review_text(required_themes)  # build an appropriate review according the required themes
-    if not fill_review(driver, review_text):  # fill the built review text
+
+    filled_review = fill_review(driver, review_text)
+    if filled_review:  # fill the built review text
+        print("[STATUS] Success")
+    else:
         return
 
     time.sleep(1)  # wait until review text will be fully filled in
+    print("\n[STATUS] Submitting the review form..")
+    submit_status = click_submit(driver)
 
-    if not click_submit(driver):  # click on the submit button and close the 'review' form
+    if submit_status:  # click on the submit button and close the 'review' form
+        print("[STATUS] Success")
+    else:
         return
 
-    print("[SUCCESS] Done.")
+    print("\n[SUCCESS] Finished")
 
 
 def check_url(driver):
     current_url = driver.current_url
 
     if "ugc/myaccount/review" not in current_url:
-        print("[ERROR] Wrong webpage! (your are not in 'ugc/myaccount/review')")
         return False
 
     return True
@@ -50,12 +77,11 @@ def fill_title(driver):
     try:
         title = driver.find_element(By.ID, elements.TITLE)
     except Exception as e:
-        print(f"[ERROR] Can't find title:\n{e}")
-        return False
+        return e
 
     title.clear()  # clear before filling
     title.send_keys(strings.DEFAULT_TITLE[randint(0, len(strings.DEFAULT_TITLE) - 1)])
-    return True
+    return None
 
 
 def get_required_themes(driver):
@@ -101,7 +127,7 @@ def click_submit(driver):
     try:
         send_button = driver.find_element(By.CLASS_NAME, elements.SEND_BUTTON)
     except Exception as e:
-        print(f"[ERROR] Can't find send button:\n{e}")
+        print(f"[ERROR] Can't find 'submit' button:\n{e}")
         return False
 
     send_button.click()
