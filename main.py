@@ -14,7 +14,7 @@ def main():
     # go to https://il.iherb.com/ugc/myaccount/review (my account -> my reviews)
     # put X number of stars on any item (in order to open review menu)
     # run the script & enjoy
-    firefox_services = Service(executable_path=r"files", service_args=['--marionette-port', '2828', '--connect-existing'])
+    firefox_services = Service(executable_path=r"files\geckodriver.exe", service_args=['--marionette-port', '2828', '--connect-existing'])
     driver = webdriver.Firefox(service=firefox_services)
 
     print("[STATUS] Checking current webpage URL..")
